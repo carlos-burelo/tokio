@@ -1,6 +1,6 @@
 # Tokio - A Simplified Backend Framework for API Development
 
-![Tokio Logo](https://example.com/tokio-logo.png)
+<img src='logo.jpeg' width='200px' heigth='200px'/>
 
 Tokio is a lightweight backend framework designed to streamline API development by leveraging the file system to create endpoints. With Tokio, you can easily organize your API routes as folders and files, making the process of building APIs more intuitive and efficient. This README will guide you through the installation process, demonstrate how to use the framework, highlight its advantages over traditional approaches like Express, provide code examples, and explain how to contribute to the project.
 
