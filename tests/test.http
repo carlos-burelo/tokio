@@ -1,0 +1,7 @@
+GET http://localhost:3000
+
+### POST /api/v1/shorten
+POST http://localhost:3000
+
+### TEST NESTED HTML
+GET http://localhost:3000/docs/references

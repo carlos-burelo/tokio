@@ -1,0 +1,25 @@
+{
+  "name": "@coatl/tokio",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch index.ts",
+    "test": "tsx tests/servers.ts"
+  },
+  "keywords": [],
+  "author": "carlos-burelo",
+  "license": "LGPL-3.0-or-later",
+  "devDependencies": {
+    "@types/node": "^20.8.3",
+    "@typescript-eslint/eslint-plugin": "^6.4.0",
+    "eslint": "^8.52.0",
+    "eslint-config-standard-with-typescript": "^39.1.1",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-n": "^15.0.0 || ^16.0.0 ",
+    "eslint-plugin-promise": "^6.0.0",
+    "tsx": "^3.14.0",
+    "typescript": "*"
+  }
+}
