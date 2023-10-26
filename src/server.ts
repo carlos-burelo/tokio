@@ -43,4 +43,8 @@ export class Tokio extends Handler {
       }
     })
   }
+
+  get server (): Server {
+    return this.#server
+  }
 }
