@@ -8,12 +8,9 @@ export type Action = (req: Request, res: Response) => void | Promise<void>
 export type Module = {
   [key in Method]?: Action
 }
-export interface Route {
-  endpoint: () => Promise<Module>
-  view?: string
-}
 
 export type RouterMap = Record<string, Module>
+
 export interface TokioOptions {
   apiPath?: string
   staticPath?: string
