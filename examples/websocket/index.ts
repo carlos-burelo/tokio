@@ -1,4 +1,4 @@
-import { Tokio } from '../../src/server.js'
+import { Tokio } from '../../src/core/server.js'
 import { Server } from 'socket.io'
 
 const app = new Tokio({ root: import.meta.url, staticPath: './public', port: 8004 })

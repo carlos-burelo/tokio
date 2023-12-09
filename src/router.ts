@@ -1,71 +1,60 @@
-import { FSError } from './errors.js'
-import { FS } from './files.js'
-import type { Request } from './request.js'
-import type { Response } from './response.js'
-import type { Module, RouterMap } from './types.js'
+import { FileSystem } from "./files.js";
+import { Matcher } from "./matcher.js";
 
 export class Router {
-  routes: RouterMap = {}
-  #apiPath: string | undefined
-  #staticPath: string | undefined
-  constructor (apiPath: string | undefined, staticPath: string | undefined) {
-    if (!apiPath && !staticPath) {
-      throw new FSError()
-    }
-    if (apiPath) this.#apiPath = FS.absolute(apiPath)
-    if (staticPath) this.#staticPath = FS.absolute(staticPath)
-  }
+  #routes: Routes = {};
 
-  async init () {
+  constructor(protected apiDir?: string, protected publicDir?: string) {}
+
+  async read() {
     const [endpoints, statics] = await Promise.all([
-      this.#apiPath ? FS.readDirRecursive(this.#apiPath) : [],
-      this.#staticPath ? FS.readDirRecursive(this.#staticPath) : []
-    ])
-    if (this.#apiPath) {
-      for (const endpoint of endpoints) {
-        const regex = FS.toRegex(endpoint, this.#apiPath)
-        this.routes[regex] = await this.#loader(endpoint)
-      }
-    }
-    if (this.#staticPath) {
-      for (const staticFile of statics.filter((ext) => ext.endsWith('.html'))) {
-        const regex = FS.toRegex(staticFile, this.#staticPath)
-        if (this.routes[regex]) {
-          this.routes[regex] = this.replaceGet(this.routes[regex], staticFile)
-        } else {
-          this.routes[regex] = this.setGetter(staticFile)
-        }
-      }
+      this.apiDir ? FileSystem.readRecursiveDir(this.apiDir) : [],
+      this.publicDir ? FileSystem.readRecursiveDir(this.publicDir) : [],
+    ]);
+    await Promise.allSettled([
+      this.#process(endpoints, this.#addRoute.bind(this)),
+      this.#process(statics, this.#addStatic.bind(this)),
+    ]);
+    this.#sort();
+    return this;
+  }
+
+  async #process(files: string[], map: Fn) {
+    return await Promise.all(files.map(map));
+  }
+
+  async #addRoute(path: string) {
+    const key = Matcher.build(path, this.apiDir as string);
+    const modulePath = FileSystem.toUrl(path);
+    const module = await import(modulePath);
+    this.#routes[key] = module;
+  }
+
+  async #addStatic(path: string) {
+    const key = Matcher.build(path, this.publicDir as string);
+    this.#addFile(key, path);
+  }
+
+  #addFile(key: string, path: string) {
+    const module: Module = { GET: async (_, r) => r.file(path) };
+    if (!this.#routes[key]) this.#routes[key] = module;
+    else {
+      this.#routes[key] = { ...this.#routes[key], ...module };
     }
   }
 
-  replaceGet (module: Module, file: string): Module {
-    return {
-      ...module,
-      GET: async (_: Request, res: Response) => {
-        await res.view(file)
-      }
-    }
+  #sort() {
+    const sorted = Object.entries(this.#routes).sort(
+      (a, b) => a[0].length - b[0].length
+    );
+    this.#routes = Object.fromEntries(sorted);
   }
 
-  setGetter (file: string) {
-    return {
-      GET: async (_: Request, res: Response) => {
-        await res.view(file)
-      }
+  match(url: string) {
+    for (const [regex, module] of Object.entries(this.#routes)) {
+      const regexObject = new RegExp(regex, "i");
+      if (regexObject.test(url)) return { regex, module };
     }
-  }
-
-  async #loader (path: string) {
-    const modulePath = FS.url(path)
-    return (await import(modulePath)) as Module
-  }
-
-  match (url: string) {
-    for (const [regex, handler] of Object.entries(this.routes)) {
-      const regexObject = new RegExp(regex, 'i')
-      if (regexObject.test(url)) return { regex, handler }
-    }
-    return null
+    return null;
   }
 }

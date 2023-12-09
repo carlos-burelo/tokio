@@ -1,4 +1,4 @@
-import { Tokio } from '../../src/index.js'
+import { Tokio } from '../../src/core/index.js'
 
 const server = new Tokio({ root: import.meta.url, apiPath: './api', port: 8001 })
 

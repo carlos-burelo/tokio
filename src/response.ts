@@ -1,7 +1,7 @@
-import type { ServerResponse } from 'http'
-import { join } from 'path'
-import { readFileSync } from 'fs'
-import { readFile } from 'fs/promises'
+import type { ServerResponse } from 'node:http'
+import { join } from 'node:path'
+import { readFileSync } from 'node:fs'
+import { readFile } from 'node:fs/promises'
 
 export class Response {
   constructor (private readonly res: ServerResponse) {}
@@ -21,6 +21,10 @@ export class Response {
 
   send (data: string | Buffer): void {
     this.res.end(data)
+  }
+
+  sendResponse (code: number, data: string | Buffer) {
+    this.status(code).send(data)
   }
 
   json (data: object): void {
@@ -65,60 +69,72 @@ export class Response {
   }
 
   // suggar methods
-  ok (): void {
-    this.status(200).send('OK')
+  ok (message: string = 'OK'): void {
+    this.sendResponse(200, message)
   }
 
-  created (): void {
-    this.status(201).send('Created')
+  created (message: string = 'Created') {
+    this.sendResponse(201, message)
   }
 
-  accepted (): void {
-    this.status(202).send('Accepted')
+  accepted (message: string = 'Accepted') {
+    this.sendResponse(202, message)
   }
 
-  noContent (): void {
-    this.status(204).send('No Content')
+  noContent (message: string = 'No Content') {
+    this.sendResponse(204, message)
   }
 
-  badRequest (): void {
-    this.status(400).send('Bad Request')
+  badRequest (message: string = 'Bad Request') {
+    this.sendResponse(400, message)
   }
 
-  unauthorized (): void {
-    this.status(401).send('Unauthorized')
+  unauthorized (message: string = 'Unauthorized') {
+    this.sendResponse(401, message)
   }
 
-  forbidden (): void {
-    this.status(403).send('Forbidden')
+  forbidden (message: string = 'Forbidden') {
+    this.sendResponse(403, message)
   }
 
-  notFound (): void {
-    this.status(404).send('Not Found')
+  notFound (message: string = 'Not Found') {
+    this.sendResponse(404, message)
   }
 
-  methodNotAllowed (): void {
-    this.status(405).send('Method Not Allowed')
+  methodNotAllowed (message: string = 'Method Not Allowed') {
+    this.sendResponse(405, message)
   }
 
-  conflict (): void {
-    this.status(409).send('Conflict')
+  conflict (message: string = 'Conflict') {
+    this.sendResponse(409, message)
   }
 
-  internalServerError (): void {
-    this.status(500).send('Internal Server Error')
+  internalServerError (message: string = 'Internal Server Error') {
+    this.sendResponse(500, message)
   }
 
-  notImplemented (): void {
-    this.status(501).send('Not Implemented')
+  notImplemented (message: string = 'Not Implemented') {
+    this.sendResponse(501, message)
   }
 
-  badGateway (): void {
-    this.status(502).send('Bad Gateway')
+  badGateway (message: string = 'Bad Gateway') {
+    this.sendResponse(502, message)
   }
 
-  serviceUnavailable (): void {
-    this.status(503).send('Service Unavailable')
+  serviceUnavailable (message: string = 'Service Unavailable') {
+    this.sendResponse(503, message)
+  }
+
+  gatewayTimeout (message: string = 'Gateway Timeout') {
+    this.sendResponse(504, message)
+  }
+
+  httpVersionNotSupported (message: string = 'HTTP Version Not Supported') {
+    this.sendResponse(505, message)
+  }
+
+  networkAuthenticationRequired (message: string = 'Network Authentication Required') {
+    this.sendResponse(511, message)
   }
 }
 
