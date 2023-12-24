@@ -155,10 +155,41 @@ Tokio is open-source software licensed under the [GNU General Public License (GP
 
 Thank you for choosing Tokio for your backend API development! We hope this framework simplifies the way you build APIs and makes the development process more enjoyable. If you encounter any issues or have suggestions for improvements, please don't hesitate to create an issue or reach out to our community. Happy coding!
 
+
+## Features
+
+- [x] File-based routing
+- [x] Support for all HTTP methods
+- [x] Middleware support
+- [x] Dynamic routing
+- [x] Custom error handling
+- [x] Custom http status
+- [x] Serve static files
+- [x] File upload
+- [x] File download
+- [x] Lightweight
+- [x] Easy to use
+- [x] Simple learning curve
+- [x] Organized file structure
+- [x] Easy to contribute
+
 ## TODO
 
 - [ ] Add support for middlewares
 - [x] Add support for static files
-- [ ] Add support for custom error handling
+- [x] Add support for custom error handling
 - [x] Add support for custom http status
 - [ ] Test coverage
+- [ ] Database integration
+- [ ] Session management
+- [x] File upload
+- [x] File download
+- [ ] Validation
+- [ ] JWT
+
+## Future
+- [ ] Add support for custom headers
+- [ ] Add support for custom CORS
+- [ ] Support for custom body parser
+- [ ] Support for custom logger
+- [ ] Support for custom router

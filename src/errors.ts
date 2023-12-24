@@ -1,9 +1,11 @@
+import { IO } from './logger.js'
+
 class TokioError extends Error {
   constructor (msg: string) {
     super(msg)
     this.stack = undefined
     this.name = 'TokioError'
-    this.message = `\x1b[31m${msg}\x1b[0m`
+    this.message = IO.parse(`9~${this.name}~: ${msg}`)
   }
 }
 export class InvalidContentTypeError extends TokioError {

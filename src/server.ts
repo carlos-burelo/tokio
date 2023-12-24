@@ -1,8 +1,10 @@
 import { Server } from 'node:http'
-import { Router } from './router.js'
 import { Controller } from './controller.js'
+import { IO } from './logger.js'
+import { Router } from './router.js'
+import type { TokioImpl, UserConfig } from './types.js'
 
-export class Tokio extends Controller {
+export class Tokio extends Controller implements TokioImpl {
   server: Server
   constructor (config: UserConfig) {
     super(config)
@@ -10,12 +12,9 @@ export class Tokio extends Controller {
   }
 
   async run () {
-    console.log(`Server running at http://localhost:${this.config.port}`)
-    this.router = new Router(this.config.api, this.config.public)
-    await this.router.read()
+    IO.print(`Server running at 4~${this.config.host}:${this.config.port}~ 🚀`)
+    this.router = new Router(this.config.api!, this.config.public)
+    await this.router.init()
     this.server.listen(this.config.port)
   }
 }
-
-const server = new Tokio({ api: './ideas/api' })
-await server.run()

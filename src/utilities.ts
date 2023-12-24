@@ -1,6 +1,7 @@
 import { createReadStream, createWriteStream } from 'node:fs'
 import { pipeline } from 'node:stream/promises'
 import { WriteFileError } from './errors.js'
+import type { TokioFile } from './types.js'
 
 export class Files {
   static async save (file: TokioFile, dest: string) {

@@ -27,19 +27,4 @@ export class FileSystem {
   static async readDir (absoluteDir: string) {
     return await readdir(absoluteDir, { withFileTypes: true })
   }
-
-  static async readRecursiveDir (absoluteDir: string, options?: RecursiveDirOptions, FILES: string[] = []) {
-    // ignore interceptors: (filename).someext or (folder)/filename.ext
-    const defaultOptions = { ignore: [/\(\w+\)/gi] }
-    options = { ...defaultOptions, ...options }
-    for (const dirent of await FileSystem.readDir(absoluteDir)) {
-      const path = resolve(absoluteDir, dirent.name)
-      if (dirent.isDirectory()) await FileSystem.readRecursiveDir(path, options, FILES)
-      else {
-        const ignore = options?.ignore?.some(regex => regex.test(path))
-        if (!ignore) FILES.push(path)
-      }
-    }
-    return FILES
-  }
 }

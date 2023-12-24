@@ -1,17 +1,20 @@
-import type { ServerResponse } from 'node:http'
 import { join } from 'node:path'
-import { readFileSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
+import type { Res, NodeResponse, HeaderImpl, CookieOptions, CookieImpl } from './types.js'
 
-export class Response {
-  constructor (private readonly res: ServerResponse) {}
+export class Response implements Res {
+  constructor (private readonly res: NodeResponse) {}
 
-  get headers (): Header {
+  get headers (): HeaderImpl {
     return new Header(this.res)
   }
 
   get cookies (): Cookie {
     return new Cookie(this.res)
+  }
+
+  get code (): number {
+    return this.res.statusCode
   }
 
   status (code: number) {
@@ -28,23 +31,23 @@ export class Response {
   }
 
   json (data: object): void {
-    this.headers.add('Content-Type', 'application/json; charset=utf-8')
+    this.headers.set('Content-Type', 'application/json; charset=utf-8')
     this.send(JSON.stringify(data))
   }
 
   redirect (url: string): void {
     this.status(302)
-    this.headers.add('Location', url)
+    this.headers.set('Location', url)
     this.send('Redirecting to ' + url)
   }
 
   html (html: string): void {
-    this.headers.add('Content-Type', 'text/html; charset=utf-8')
+    this.headers.set('Content-Type', 'text/html; charset=utf-8')
     this.send(html)
   }
 
   text (text: string): void {
-    this.headers.add('Content-Type', 'text/plain; charset=utf-8')
+    this.headers.set('Content-Type', 'text/plain; charset=utf-8')
     this.send(text)
   }
 
@@ -52,8 +55,8 @@ export class Response {
     this.send(data)
   }
 
-  file (path: string): void {
-    const data = readFileSync(path)
+  async file (path: string) {
+    const data = await readFile(path)
     this.raw(data)
   }
 
@@ -62,9 +65,9 @@ export class Response {
     this.html(data)
   }
 
-  download (path: string, filename?: string): void {
-    const data = readFileSync(join(process.cwd(), path))
-    this.headers.add('Content-Disposition', `attachment; filename=${filename}`)
+  async download (path: string, filename?: string) {
+    const data = await readFile(join(process.cwd(), path))
+    this.headers.set('Content-Disposition', `attachment; filename=${filename}`)
     this.raw(data)
   }
 
@@ -137,30 +140,18 @@ export class Response {
     this.sendResponse(511, message)
   }
 }
-
-class Header {
-  constructor (private readonly res: ServerResponse) {}
-  add (key: string, value: string): void {
+class Header implements HeaderImpl {
+  constructor (private readonly res: NodeResponse) {}
+  set (key: string, value: string): void {
     this.res.setHeader(key, value)
   }
 
-  get (key: string): string | string[] | number | undefined {
+  get (key: string) {
     return this.res.getHeader(key)
   }
 }
-
-interface CookieOptions {
-  domain?: string
-  expires?: Date
-  httpOnly?: boolean
-  maxAge?: number
-  path?: string
-  sameSite?: boolean | 'lax' | 'strict' | 'none'
-  secure?: boolean
-}
-
-class Cookie {
-  constructor (private readonly res: ServerResponse) {}
+class Cookie implements CookieImpl {
+  constructor (private readonly res: NodeResponse) {}
 
   set (key: string, value: string, options: CookieOptions = {}): void {
     const cookie = `${key}=${value}; ${this.serialize(options)}`

@@ -1,43 +1,44 @@
-import { type IncomingMessage } from 'node:http'
-import { FormParser, MultipartParser, JsonParser, TextParser } from './parsers/index.js'
-import { InvalidContentLengthError, InvalidContentTypeError } from './errors.js'
+import { FormParser, JsonParser, MultipartParser, TextParser } from './parsers/index.js'
+import type { ParserConstructor, BodyImpl, NodeRequest, BodyType, BodyRequest } from './types.js'
 
-const PARSER_MAP = new Map<string, BodyParser>([
+const PARSER_MAP = new Map<string, ParserConstructor>([
   ['application/x-www-form-urlencoded', FormParser],
-  ['multipart/form-data', MultipartParser],
   ['application/json', JsonParser],
+  ['multipart/form-data', MultipartParser],
   ['text/plain', TextParser]
 ])
-export class Body {
-  #type: string
-  #limit = 1024 * 1024
+
+export class Body implements BodyImpl {
+  readonly #type: string
+  readonly #limit = 1024 * 1024
 
   async #raw () {
     return await new Promise<Buffer>(resolve => {
       const data: Uint8Array[] = []
-      this.req.on('data', chunk => {
+      this.req.on('data', (chunk: Uint8Array) => {
         const length = data.length + chunk.length
-        if (length > this.#limit) throw new InvalidContentLengthError()
+        if (length > this.#limit) throw new Error()
         data.push(chunk)
       })
       this.req.on('end', () => resolve(Buffer.concat(data)))
     })
   }
 
-  constructor (private readonly req: IncomingMessage) {
-    this.#type = this.req.headers['content-type'] as string
+  constructor (private readonly req: NodeRequest) {
+    this.#type = this.req.headers['content-type']!
   }
 
   #getParser () {
-    const type = this.#type.split(';').shift() as string
+    const type = this.#type.split(';').shift()!
     const parser = PARSER_MAP.get(type)
-    if (!parser) throw new InvalidContentTypeError(this.#type)
+    if (!parser) throw new Error(this.#type)
     return parser
   }
 
   async parse<T extends BodyType = 'form'> (): Promise<BodyRequest[T]> {
-    const parser = this.#getParser()
+    const Parser = this.#getParser()
     const body = await this.#raw()
-    return await parser(body, this.req) as BodyRequest[T]
+    const instance = new Parser(body, this.req)
+    return await instance.parse() as BodyRequest[T]
   }
 }

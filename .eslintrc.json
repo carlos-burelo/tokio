@@ -21,6 +21,9 @@
     "@typescript-eslint/no-misused-promises": "off",
     "@typescript-eslint/no-confusing-void-expression": "off",
     "@typescript-eslint/no-throw-literal": "off",
+    "@typescript-eslint/no-useless-constructor": "off",
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/method-signature-style": "off",
     // blank spaces between methods
     "lines-between-class-members": [
       "error",
